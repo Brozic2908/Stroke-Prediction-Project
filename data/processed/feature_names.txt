@@ -1,0 +1,26 @@
+gender
+age
+hypertension
+heart_disease
+ever_married
+Residence_type
+avg_glucose_level
+bmi
+health_risk_score
+age_glucose_interaction
+age_bmi_interaction
+work_Never_worked
+work_Private
+work_Self-employed
+work_children
+smoking_formerly smoked
+smoking_never smoked
+smoking_smokes
+age_group_Middle
+age_group_Senior
+age_group_Elderly
+bmi_category_Normal
+bmi_category_Overweight
+bmi_category_Obese
+glucose_category_Prediabetes
+glucose_category_Diabetes

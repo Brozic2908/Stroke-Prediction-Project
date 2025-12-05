@@ -1,0 +1,16 @@
+THÔNG TIN DỮ LIỆU ĐÃ XỬ LÝ
+================================================================================
+
+Original data shape: (5110, 12)
+Cleaned data shape: (5096, 11)
+Final feature count: 26
+
+-------------------- DATASETS --------------------
+Train (Balanced - SMOTE): (5816, 27)
+Train (Original Scaled):  (3057, 27)
+Validation:               (1019, 27)
+Test:                     (1020, 27)
+
+-------------------- SETTINGS --------------------
+Scaler: StandardScaler
+Resampling: SMOTE (Train set only)

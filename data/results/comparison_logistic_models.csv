@@ -1,0 +1,5 @@
+,Raw Data Model,Processed Data Model
+precision,0.0,0.1183098591549295
+recall,0.0,0.84
+f1-score,0.0,0.2074074074074074
+support,53.0,50.0
