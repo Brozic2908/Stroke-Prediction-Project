@@ -1,0 +1,2 @@
+num_leaves,max_depth,learning_rate,feature_fraction,bagging_fraction,bagging_freq,min_child_samples,best_auc_valid
+15,-1,0.05,1.0,0.8,5,20,0.8715376676986585
