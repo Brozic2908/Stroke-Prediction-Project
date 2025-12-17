@@ -573,19 +573,16 @@ elif page.startswith("3."):
     st.markdown("**Bảng confusion matrix:**")
     st.dataframe(cm_df)
 
-    # vẽ heatmap nhẹ cho dễ nhìn
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots()
     im = ax.imshow(cm_df.values)
 
-    # label
     ax.set_xticks(range(len(cm_df.columns)))
     ax.set_xticklabels(cm_df.columns)
     ax.set_yticks(range(len(cm_df.index)))
     ax.set_yticklabels(cm_df.index)
 
-    # ghi số lên từng ô
     for i in range(cm_df.shape[0]):
         for j in range(cm_df.shape[1]):
             ax.text(j, i, cm_df.values[i, j],
@@ -595,96 +592,31 @@ elif page.startswith("3."):
     st.pyplot(fig)
 
 elif page.startswith("4."):
-    st.markdown("### Phần 4 - So sánh XGBoost và LightGBM")
+    st.markdown("### Phần 4 - So sánh các mô hình ML")
 
-    # ===== 1. Load model + dữ liệu =====
+    st.subheader("1. Bảng so sánh các mô hình")
+
     try:
-        xgb_model = load_xgb_model()
-        lgbm_model = load_lgbm_model()
-        X_val, y_val = load_validation_data()
+        compare_df = pd.read_csv(RESULTS_DIR / "model_comparison.csv")
+        st.dataframe(compare_df, use_container_width=True)
     except Exception as e:
-        st.error(f"Không load được model hoặc dữ liệu validation: {e}")
+        st.error(f"Không thể load bảng model_comparison.csv: {e}")
         st.stop()
 
-    # ===== 2. Chọn biến thể XGBoost để đem ra so sánh =====
-    xgb_results = load_xgb_results()
-    if xgb_results is None:
-        st.warning(
-            "Không tìm thấy `xgboost_variants_metrics.csv`, "
-            "tạm dùng threshold 0.5 cho XGBoost."
-        )
-        xgb_variant = "default_0.5"
-        xgb_threshold = 0.5
-    else:
-        st.markdown("**Chọn biến thể XGBoost dùng để so sánh:**")
-        variant_names = xgb_results["variant"].unique().tolist()
-
-        # Nếu có F2_opt thì cho làm default
-        default_index = 0
-        if "F2_opt" in variant_names:
-            default_index = variant_names.index("F2_opt")
-
-        xgb_variant = st.selectbox("Biến thể XGBoost:", variant_names, index=default_index)
-
-        # Lấy threshold tương ứng trong file csv
-        xgb_threshold = float(
-            xgb_results.loc[
-                xgb_results["variant"] == xgb_variant, "threshold"
-            ].iloc[0]
-        )
-
-    st.write(f"➡️ XGBoost dùng threshold: `{xgb_threshold:.3f}`")
-
-    # ===== 3. Tính metric cho cả 2 model trên validation =====
-
-    # XGBoost
-    xgb_proba = xgb_model.predict_proba(X_val)[:, 1]
-    xgb_pred  = (xgb_proba >= xgb_threshold).astype(int)
-
-    # LightGBM: dùng threshold 0.5
-    lgb_proba = lgbm_model.predict_proba(X_val)[:, 1]
-    lgb_pred  = (lgb_proba >= 0.5).astype(int)
-
-    def build_metrics_row(name, y_true, y_pred, y_proba):
-        return {
-            "Model":    name,
-            "Accuracy": accuracy_score(y_true, y_pred),
-            "Precision": precision_score(y_true, y_pred, zero_division=0),
-            "Recall":   recall_score(y_true, y_pred, zero_division=0),
-            "F1":       f1_score(y_true, y_pred, zero_division=0),
-            "AUC":      roc_auc_score(y_true, y_proba),
-        }
-
-    rows = [
-        build_metrics_row(f"XGBoost ({xgb_variant})", y_val, xgb_pred, xgb_proba),
-        build_metrics_row("LightGBM (best)",          y_val, lgb_pred, lgb_proba),
-    ]
-
-    compare_df = pd.DataFrame(rows).set_index("Model")
-
-    # ===== 4. Bảng so sánh =====
-    st.subheader("1. Bảng so sánh metric (Validation)")
-    st.dataframe(compare_df.style.format("{:.3f}"), use_container_width=True)
-    st.caption("Precision / Recall / F1 được tính cho lớp **1 (stroke = 1)**.")
-
-    # ===== 5. Biểu đồ so sánh AUC & Recall =====
-    st.subheader("2. Biểu đồ so sánh")
+    st.subheader("2. Biểu đồ so sánh các metric")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("**So sánh AUC:**")
-        st.bar_chart(compare_df["AUC"])
+        st.markdown("**Precision**")
+        st.image(RESULTS_DIR / "precision_plot.png")
+
+        st.markdown("**F1-score**")
+        st.image(RESULTS_DIR / "f1_plot.png")
 
     with col2:
-        st.markdown("**So sánh Recall:**")
-        st.bar_chart(compare_df["Recall"])
+        st.markdown("**Recall**")
+        st.image(RESULTS_DIR / "recall_plot.png")
 
-    # ===== 6. Nhận xét nhanh =====
-    st.subheader("3. Nhận xét")
-
-    best_auc_model = compare_df["AUC"].idxmax()
-    best_recall_model = compare_df["Recall"].idxmax()
-
-    st.write(f"- Mô hình có **AUC cao hơn** trên validation: **{best_auc_model}**.")
-    st.write(f"- Mô hình có **Recall tốt hơn cho lớp 1**: **{best_recall_model}**.")
+        st.markdown("**Accuracy**")
+        st.image(RESULTS_DIR / "accuracy_plot.png")
